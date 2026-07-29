@@ -1,0 +1,87 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Alice ↔ Arylic Sync",
+        "description": "Manba (Yandex Station / Alice) va chiqish kolonka(lar)ni tanlang. Bir nechta kolonka tanlasangiz — multi-room: hammasi avtomatik guruhlanib, bir xil musiqani sinxron chaladi. Barcha vaqt va ovoz sozlamalarini keyinroq «Sozlash» (Configure) orqali o'zgartirishingiz mumkin.",
+        "data": {
+          "alice_entity": "Alice (Yandex Station) — manba",
+          "arylic_entities": "Arylic kolonkalar (Music Assistant) — chiqish"
+        },
+        "data_description": {
+          "alice_entity": "Musiqa shu yerda boshlanadi va ovoz bilan boshqariladigan media player.",
+          "arylic_entities": "Arylic kolonkalaringizning Music Assistant'dagi entity'lari (xom LinkPlay entity emas). Bir nechta tanlasangiz, barcha xonalarda bir xil, sinxron chaladi — birinchisi yetakchi bo'ladi."
+        }
+      }
+    },
+    "error": {
+      "same_entity": "Manba chiqish kolonkalari ichida bo'lmasligi kerak.",
+      "no_outputs": "Kamida bitta Arylic kolonka tanlang.",
+      "music_assistant_missing": "Music Assistant integratsiyasi topilmadi. Avval Music Assistant'ni o'rnatib sozlang."
+    },
+    "abort": {
+      "already_configured": "Bu Alice → Arylic kombinatsiyasi allaqachon sozlangan."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Sinxron sozlamalari",
+        "description": "Crossfade vaqti va ovozlar. Eng muhim ikki tugma: «Sinxron offset» (Arylic Alice'dan orqada qolsa — oshiring) va «Arylic head-start» (ovoz pog'onalab emas, sakrab chiqsa — oshiring).",
+        "data": {
+          "sync_offset": "Sinxron offset (soniya)",
+          "handoff_delay": "Boshlash kechikishi (soniya)",
+          "steps": "Crossfade qadamlari",
+          "arylic_headstart_ms": "Arylic head-start (ms)",
+          "alice_gap_ms": "Alice pauzasi (ms)",
+          "arylic_floor": "Arylic boshlang'ich ovozi",
+          "arylic_target": "Arylic yakuniy ovozi",
+          "alice_end_volume": "Alice yakuniy ovozi",
+          "stop_fade_floor": "To'xtash: Arylic pasayish chegarasi",
+          "alice_restore_volume": "To'xtash: Alice qaytariladigan ovoz",
+          "stop_steps": "To'xtash: pasayish qadamlari",
+          "stop_step_delay_ms": "To'xtash: qadamlar orasidagi kutish (ms)",
+          "stop_confirm_delay": "To'xtashni tasdiqlash kechikishi (s)",
+          "play_wait_timeout": "Timeout: Arylic ijrosini kutish (s)",
+          "buffer_wait_timeout": "Timeout: seekdan keyin kutish (s)",
+          "track_uri_prefix": "Trek URI prefiksi",
+          "media_type": "Media turi",
+          "regroup_each_track": "Har trekda qayta guruhlash",
+          "seek_each_output": "Har bir chiqishni alohida seek qilish",
+          "skip_seek": "Seekni o'tkazib yuborish (Arylic seek bug'i)",
+          "redirect_volume": "Alice ovoz buyrug'ini kolonkalarga yo'naltirish"
+        },
+        "data_description": {
+          "sync_offset": "Arylic Alice bilan bir xil sekunddan chiqishi uchun tuzatish. Arylic orqada bo'lsa — oshiring; oldinda bo'lsa — kamaytiring.",
+          "handoff_delay": "Alice'da musiqa boshlangach, uzatishdan oldin shuncha kutadi (0 = darhol).",
+          "steps": "Crossfade necha qadamda bajariladi. Ko'p = silliqroq, lekin sekinroq.",
+          "arylic_headstart_ms": "Har qadamda Arylic ko'tarilgach, Alice tushishidan oldingi pauza. Arylic'ning buyruq kechikishini yopadi.",
+          "alice_gap_ms": "Alice tushgandan keyin keyingi qadamgacha kutish.",
+          "arylic_floor": "Arylic shu ovozdan boshlab ko'tariladi.",
+          "arylic_target": "Crossfade oxirida Arylic shu ovozga chiqadi.",
+          "alice_end_volume": "Crossfade oxirida Alice shu ovozga tushadi (0 = jim; agar Station 0 da pauza qilsa, 0.01 qiling).",
+          "stop_fade_floor": "Musiqa to'xtaganda Arylic pauzadan oldin shu ovozgacha pasayadi.",
+          "alice_restore_volume": "To'xtagandan keyin Alice ovozi shu darajaga qaytadi.",
+          "stop_steps": "To'xtash pasayishi necha qadamda bajariladi.",
+          "stop_step_delay_ms": "To'xtash pasayish qadamlari orasidagi kutish.",
+          "stop_confirm_delay": "Musiqa to'xtaganda shuncha kutib, qaytadan tekshiradi. Agar shu vaqt ichida musiqa qaytsa (Alice'ga 'balandlat' kabi ovozli buyruq berilgani uchun stansiya bir lahzaga to'xtagan bo'lsa), to'xtash bekor qilinadi — kolonkalar to'xtamaydi va ovoz buyrug'i ularga qo'llanadi. Ovoz buyruqlari ishlashi uchun >0 bo'lishi kerak; ovozli buyruqlaringiz uzunroq bo'lsa (masalan 'ob-havo qanaqa') oshiring.",
+          "play_wait_timeout": "Davom etishdan oldin Arylic 'playing' holatiga o'tishini shuncha kutamiz.",
+          "buffer_wait_timeout": "Seekdan keyin player yangi pozitsiyani qabul qilishini shuncha kutamiz.",
+          "track_uri_prefix": "Alice'ning media_content_id qiymati oldiga qo'shiladi. Yandex Music uchun 'yandex_music://track/'; boshqa Music Assistant provayderi uchun o'zgartiring.",
+          "media_type": "music_assistant.play_media uchun media turi (odatda 'track').",
+          "regroup_each_track": "Har trek boshlanganda kolonkalarni qaytadan guruhlaydi. Xonalar vaqt o'tib bir-biridan ajralib ketsa yoqing (har trekda biroz uzilish bo'lishi mumkin).",
+          "seek_each_output": "Seekni faqat yetakchiga emas, har bir kolonkaga alohida yuboradi. Kolonkalaringizni Music Assistant namuna-aniqligida sinxron qila olmasa yoqing.",
+          "skip_seek": "Ba'zi Arylic/LinkPlay firmware'larida Music Assistant orqali seek qilinganda stream uziladi (progress 0:00 ga qaytadi, MA'ni restart qilish kerak — HA core #136905). Shu holatda yoqing: kolonkalar trekni 0:00 dan boshlaydi, sinxron faqat «Sinxron offset» bilan taxminiy bo'ladi, lekin stream uzilmaydi.",
+          "redirect_volume": "Handoff bo'lgach (Alice jim, kolonkalar chalayotganda) Alice'ga 'ovozni balandlat/pasaytir' desangiz, o'zgarish Alice'ga emas, KOLONKALARGA qo'llanadi; Alice jim qoladi. Faqat 'Alice yakuniy ovozi' past (≤0.15) bo'lganda ishlaydi. ESLATMA: 'pasaytir' ishlashi uchun 'Alice yakuniy ovozi' 0 dan katta bo'lishi kerak (masalan 0.05) — aks holda Alice 0 dan pastga tusholmaydi va 'pasaytir' sezilmaydi."
+        }
+      }
+    }
+  },
+  "entity": {
+    "switch": {
+      "sync_enabled": {
+        "name": "Sinxron"
+      }
+    }
+  }
+}

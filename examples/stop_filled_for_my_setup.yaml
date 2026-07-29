@@ -1,0 +1,68 @@
+# Namuna Stop avtomatikasi (blueprintsiz) — AVVAL ikkala media_player entity
+# ID'sini O'ZINGIZNIKIGA almashtiring.
+#
+# DIQQAT: Alice entity'si bu faylda 2 joyda uchraydi (variables + trigger).
+# Triggerlar variables blokidan foydalana OLMAYDI — faqat variables'ni
+# o'zgartirsangiz, trigger eski entity'da qolib, avtomatika ishga tushmaydi.
+
+alias: "Alice stop -> Arylic | Smooth Stop & Restore (filled)"
+description: >-
+  Alice'da musiqa to'xtasa, Arylic yumshoq pasayadi va pauza bo'ladi,
+  Alice ovozi 50% ga qaytadi.
+mode: restart
+max_exceeded: silent
+
+variables:
+  alice_player: media_player.YOUR_YANDEX_STATION
+  arylic_player: media_player.YOUR_ARYLIC_MA_PLAYER
+  arylic_fade_floor: 0.01
+  alice_restore_volume: 0.5
+  steps: 10
+  step_delay_ms: 200
+
+triggers:
+  - trigger: state
+    entity_id: media_player.YOUR_YANDEX_STATION
+    from: playing
+    to:
+      - idle
+      - paused
+      - standby
+      - "off"
+
+# (1) Arylic haqiqatan chalayotgan bo'lsin; (2) Alice'da aynan MUSIQA
+# to'xtagan bo'lsin (ovozli javob/yangilik/budilnik emas).
+conditions:
+  - condition: template
+    value_template: "{{ is_state(arylic_player, 'playing') }}"
+  - condition: template
+    value_template: >
+      {{ (trigger.from_state.attributes.media_content_type | default('')) == 'music' }}
+
+actions:
+  - variables:
+      arylic_start_volume: "{{ state_attr(arylic_player, 'volume_level') | float(0.35) }}"
+
+  - repeat:
+      count: "{{ steps | int }}"
+      sequence:
+        - action: media_player.volume_set
+          target:
+            entity_id: "{{ arylic_player }}"
+          data:
+            volume_level: >
+              {% set start = arylic_start_volume | float(0.35) %}
+              {% set finish = arylic_fade_floor | float(0.01) %}
+              {% set n = steps | int %}
+              {{ [finish, start - ((start - finish) / n * repeat.index)] | max | round(3) }}
+        - delay: "{{ (step_delay_ms | int) / 1000 }}"
+
+  - action: media_player.media_pause
+    target:
+      entity_id: "{{ arylic_player }}"
+
+  - action: media_player.volume_set
+    target:
+      entity_id: "{{ alice_player }}"
+    data:
+      volume_level: "{{ alice_restore_volume | float(0.5) }}"
