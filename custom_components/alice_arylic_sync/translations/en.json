@@ -3,6 +3,14 @@
     "step": {
       "user": {
         "title": "Alice ↔ Arylic Sync",
+        "description": "Nima qo'shmoqchisiz?",
+        "menu_options": {
+          "pair": "🎵 Alice → Arylic juftlik (musiqani kolonkaga uzatish)",
+          "group": "👥 Kolonka guruhi (2+ kolonkani bir-biriga ulash)"
+        }
+      },
+      "pair": {
+        "title": "Alice → Arylic juftlik",
         "description": "Manba (Yandex Station / Alice) va chiqish kolonka(lar)ni tanlang. Bir nechta kolonka tanlasangiz — multi-room: hammasi avtomatik guruhlanib, bir xil musiqani sinxron chaladi. Barcha vaqt va ovoz sozlamalarini keyinroq «Sozlash» (Configure) orqali o'zgartirishingiz mumkin.",
         "data": {
           "alice_entity": "Alice (Yandex Station) — manba",
@@ -12,15 +20,29 @@
           "alice_entity": "Musiqa shu yerda boshlanadi va ovoz bilan boshqariladigan media player.",
           "arylic_entities": "Arylic kolonkalaringizning Music Assistant'dagi entity'lari (xom LinkPlay entity emas). Bir nechta tanlasangiz, barcha xonalarda bir xil, sinxron chaladi — birinchisi yetakchi bo'ladi."
         }
+      },
+      "group": {
+        "title": "Kolonka guruhi",
+        "description": "2 yoki undan ortiq kolonkani bitta knopka (switch) bilan bir-biriga ulaydigan guruh yaratadi. Knopka YOQILGANDA barcha kolonkalar yetakchiga qo'shilib, bir xil musiqani sinxron chaladi; O'CHIRILGANDA har biri yana mustaqil bo'ladi. Alice bu yerda ishtirok etmaydi — bu faqat kolonkalarni birlashtirish uchun.",
+        "data": {
+          "group_leader": "Yetakchi kolonka (Music Assistant)",
+          "group_members": "Qo'shiladigan kolonkalar (Music Assistant)"
+        },
+        "data_description": {
+          "group_leader": "Guruhning «xo'jayini» — qolganlari shunga qo'shiladi va shu chalayotgan narsani takrorlaydi.",
+          "group_members": "Yetakchiga ulanadigan bir yoki bir nechta kolonka. Hammasi Music Assistant entity'lari bo'lishi shart (xom LinkPlay emas)."
+        }
       }
     },
     "error": {
       "same_entity": "Manba chiqish kolonkalari ichida bo'lmasligi kerak.",
       "no_outputs": "Kamida bitta Arylic kolonka tanlang.",
-      "music_assistant_missing": "Music Assistant integratsiyasi topilmadi. Avval Music Assistant'ni o'rnatib sozlang."
+      "music_assistant_missing": "Music Assistant integratsiyasi topilmadi. Avval Music Assistant'ni o'rnatib sozlang.",
+      "no_members": "Kamida bitta qo'shiladigan kolonka tanlang.",
+      "leader_in_members": "Yetakchi kolonka qo'shiladiganlar ichida bo'lmasligi kerak."
     },
     "abort": {
-      "already_configured": "Bu Alice → Arylic kombinatsiyasi allaqachon sozlangan."
+      "already_configured": "Bu kombinatsiya allaqachon sozlangan."
     }
   },
   "options": {
@@ -75,12 +97,18 @@
           "redirect_volume": "Handoff bo'lgach (Alice jim, kolonkalar chalayotganda) Alice'ga 'ovozni balandlat/pasaytir' desangiz, o'zgarish Alice'ga emas, KOLONKALARGA qo'llanadi; Alice jim qoladi. Faqat 'Alice yakuniy ovozi' past (≤0.15) bo'lganda ishlaydi. ESLATMA: 'pasaytir' ishlashi uchun 'Alice yakuniy ovozi' 0 dan katta bo'lishi kerak (masalan 0.05) — aks holda Alice 0 dan pastga tusholmaydi va 'pasaytir' sezilmaydi."
         }
       }
+    },
+    "abort": {
+      "group_no_options": "Kolonka guruhida sozlanadigan parametr yo'q — uni yoqish/o'chirish uchun «Guruh» knopkasidan foydalaning."
     }
   },
   "entity": {
     "switch": {
       "sync_enabled": {
         "name": "Sinxron"
+      },
+      "group_enabled": {
+        "name": "Guruh"
       }
     }
   }
