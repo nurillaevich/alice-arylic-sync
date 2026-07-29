@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
@@ -22,7 +23,10 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from . import AliceArylicConfigEntry, _is_group
 from .const import CONF_GROUP_LEADER, CONF_GROUP_MEMBERS, DOMAIN
 
+_LOGGER = logging.getLogger(__name__)
+
 GROUP_MEMBERS_ATTR = "group_members"
+VOLUME_ATTR = "volume_level"
 UNAVAILABLE_STATES = (None, "unavailable", "unknown")
 
 
@@ -128,6 +132,38 @@ class ArylicGroupSwitch(SwitchEntity):
     def _state_changed(self, event: Event[EventStateChangedData]) -> None:
         self._recompute()
         self.async_write_ha_state()
+        # Volume follow: when the LEADER's volume changes while the group is on,
+        # every member takes the exact same level — the follower tracks the boss.
+        if not self._attr_is_on or event.data["entity_id"] != self._leader:
+            return
+        new = event.data["new_state"]
+        old = event.data["old_state"]
+        if new is None:
+            return
+        new_vol = new.attributes.get(VOLUME_ATTR)
+        old_vol = old.attributes.get(VOLUME_ATTR) if old else None
+        if new_vol is None:
+            return
+        # Compare rounded so float jitter doesn't spam volume_set calls.
+        if old_vol is not None and round(new_vol, 3) == round(old_vol, 3):
+            return
+        self.hass.async_create_task(self._push_volume(round(new_vol, 3)))
+
+    async def _push_volume(self, volume: float) -> None:
+        """Set the same volume on every available member (fault-isolated)."""
+        for member in self._members:
+            if self.hass.states.get(member) is None:
+                continue
+            try:
+                await self.hass.services.async_call(
+                    "media_player",
+                    "volume_set",
+                    {"volume_level": volume},
+                    target={"entity_id": member},
+                    blocking=True,
+                )
+            except Exception as err:  # noqa: BLE001
+                _LOGGER.debug("Volume follow: could not set %s: %s", member, err)
 
     @callback
     def _recompute(self) -> None:
@@ -177,17 +213,42 @@ class ArylicGroupSwitch(SwitchEntity):
                     blocking=True,
                 )
 
+        # Start matched: members immediately take the leader's current volume.
+        if leader is not None:
+            leader_vol = leader.attributes.get(VOLUME_ATTR)
+            if leader_vol is not None:
+                await self._push_volume(round(leader_vol, 3))
+
         self._attr_is_on = True
         self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        """Split the group: every member (and the leader) becomes standalone."""
-        await self.hass.services.async_call(
-            "media_player",
-            "unjoin",
-            {},
-            target={"entity_id": [self._leader, *self._members]},
-            blocking=True,
-        )
+        """Split the group: every member leaves and becomes standalone.
+
+        Only the MEMBERS are unjoined — never the leader. Unjoining the leader
+        asks Music Assistant to dissolve the group via ``set_members``, which some
+        MA player providers do not implement ("set_members needs to be implemented
+        when PlayerFeature.SET_MEMBERS is set"). Removing each member one by one
+        leaves the leader standalone without hitting that path, and any provider
+        that still rejects a member is logged instead of failing the whole action.
+        """
+        for member in self._members:
+            if self.hass.states.get(member) is None:
+                continue
+            try:
+                await self.hass.services.async_call(
+                    "media_player",
+                    "unjoin",
+                    {},
+                    target={"entity_id": member},
+                    blocking=True,
+                )
+            except Exception as err:  # noqa: BLE001
+                _LOGGER.warning(
+                    "Could not unjoin %s from the group (leave it via the "
+                    "speaker's own app if it stays grouped): %s",
+                    member,
+                    err,
+                )
         self._attr_is_on = False
         self.async_write_ha_state()

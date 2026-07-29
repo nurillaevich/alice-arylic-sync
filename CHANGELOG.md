@@ -3,6 +3,22 @@
 Barcha muhim o'zgarishlar shu faylda qayd etiladi.
 Format [Keep a Changelog](https://keepachangelog.com/) asosida.
 
+## [1.6.2] - 2026-07-29
+
+### Tuzatildi
+- **«Guruh» knopkasini O'CHIRISHDA xato chiqardi:** *"set_members needs to be
+  implemented when PlayerFeature.SET_MEMBERS is set"*. Sabab — yetakchini
+  `unjoin` qilish Music Assistant'ning guruhni «set_members» orqali tarqatish
+  yo'lini ishga tushiradi, ba'zi MA provayderlar buni qo'llab-quvvatlamaydi.
+  Endi faqat **a'zolar** uziladi (yetakchi emas), har biri alohida va xatoga
+  chidamli — bittasi rad etsa ham, qolganlari uziladi va qizil xato chiqmaydi.
+
+### Qo'shildi
+- **Ovoz ergashuvi.** Guruh yoqilganda a'zolar darhol yetakchining ovoz
+  darajasiga o'tadi, va keyin **yetakchi ovozi o'zgarsa — a'zolar ham
+  avtomatik o'sha darajaga** o'tadi. «Asosiy kolonka nechi bo'lsa,
+  ergashuvchi ham shunaqa» — bir tugmadan boshqarasiz.
+
 ## [1.6.1] - 2026-07-29
 
 ### Yaxshilandi

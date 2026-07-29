@@ -164,17 +164,21 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     reload), so this is the safe place for it. A speaker-group entry is grouped by
     definition, so its removal dissolves the group the same way."""
     if _is_group(entry):
-        outputs = [entry.data[CONF_GROUP_LEADER], *entry.data[CONF_GROUP_MEMBERS]]
+        # Members only — never the leader (its dissolve path hits the
+        # SET_MEMBERS NotImplementedError on some MA providers). A group always
+        # has at least one joined member, so no minimum-count guard here.
+        targets = list(entry.data.get(CONF_GROUP_MEMBERS, []))
     else:
         outputs = list(entry.data.get(CONF_ARYLIC_ENTITIES, []))
-    if len(outputs) < 2:
-        return  # single output (or none) was never grouped
+        targets = outputs if len(outputs) >= 2 else []  # single output was never grouped
+    if not targets:
+        return
     try:
         await hass.services.async_call(
             "media_player",
             "unjoin",
             {},
-            target={"entity_id": outputs},
+            target={"entity_id": targets},
             blocking=True,
         )
         _LOGGER.info("Dissolved the Arylic group for removed entry '%s'", entry.title)
