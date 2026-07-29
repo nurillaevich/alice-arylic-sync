@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
@@ -142,7 +143,18 @@ class ArylicGroupSwitch(SwitchEntity):
         return {"leader": self._leader, "members": self._members}
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        """Join every member to the leader (one grouped, synced set)."""
+        """Join every member to the leader — gaplessly, mid-playback.
+
+        We NEVER pause or restart the leader: if it is already playing when the
+        group is switched on, the join just adds the members underneath the
+        running stream and they sync to it. Some LinkPlay firmwares briefly drop
+        the leader out of 'playing' on join, so if it was playing before we nudge
+        it straight back to play — the music continues without a manual pause and
+        without the user touching anything.
+        """
+        leader = self.hass.states.get(self._leader)
+        was_playing = leader is not None and leader.state == "playing"
+
         await self.hass.services.async_call(
             "media_player",
             "join",
@@ -150,6 +162,21 @@ class ArylicGroupSwitch(SwitchEntity):
             target={"entity_id": self._leader},
             blocking=True,
         )
+
+        if was_playing:
+            # Give the join a moment to settle, then resume the leader only if the
+            # firmware actually blipped it — otherwise leave the running stream be.
+            await asyncio.sleep(0.4)
+            still = self.hass.states.get(self._leader)
+            if still is not None and still.state != "playing":
+                await self.hass.services.async_call(
+                    "media_player",
+                    "media_play",
+                    {},
+                    target={"entity_id": self._leader},
+                    blocking=True,
+                )
+
         self._attr_is_on = True
         self.async_write_ha_state()
 

@@ -3,6 +3,16 @@
 Barcha muhim o'zgarishlar shu faylda qayd etiladi.
 Format [Keep a Changelog](https://keepachangelog.com/) asosida.
 
+## [1.6.1] - 2026-07-29
+
+### Yaxshilandi
+- **Guruh knopkasi endi uzluksiz (gapless) ulaydi.** Musiqa chalinayotган paytда
+  «Guruh» knopkasini YOQSANGIZ, yetakchi kolonка **to'xtamaydi** — a'zolar ishlab
+  turган oqim ostiga qo'shilib, unga moslashadi. Ba'zи LinkPlay firmware'lar
+  `join`да yetakchini bir lahzага «playing»dан chiqаради; shундай bo'lса, knopка
+  uni darhol qайта «play» qilади — musiqа o'zи davom etади, qo'lда hech narsа
+  bosish shart emas. Yetakchи hech qачон biz tomonimizdan pauzа qilinmaydi.
+
 ## [1.6.0] - 2026-07-29
 
 ### Qo'shildi
