@@ -111,7 +111,11 @@ class AliceArylicSyncConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         schema = vol.Schema(
             {
                 vol.Required(CONF_ALICE_ENTITY): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain="media_player")
+                    # Source = a Yandex Station (Alice) only, so the list is not
+                    # cluttered with every other media_player (Arylic, TVs, …).
+                    selector.EntitySelectorConfig(
+                        domain="media_player", integration="yandex_station"
+                    )
                 ),
                 vol.Required(CONF_ARYLIC_ENTITIES): selector.EntitySelector(
                     selector.EntitySelectorConfig(

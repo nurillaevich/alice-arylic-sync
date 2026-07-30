@@ -3,6 +3,16 @@
 Barcha muhim o'zgarishlar shu faylda qayd etiladi.
 Format [Keep a Changelog](https://keepachangelog.com/) asosida.
 
+## [1.6.3] - 2026-07-29
+
+### Tuzatildi
+- **Manba (Alice) maydoni endi faqat Yandex Station'larni ko'rsatadi.** Avval u
+  barcha `media_player`larni ko'rsatardi (oddiy kolonkalar, TV'lar ham),
+  shuning uchun Alice'ni tanlash chalkash edi. Endi maydon `yandex_station`
+  integratsiyasi bilan filtrlanadi — ro'yxatda faqat Alice/Yandex kolonkalari
+  chiqadi. Chiqish (Arylic) maydoni avvalgidek faqat Music Assistant
+  entity'larini ko'rsatadi.
+
 ## [1.6.2] - 2026-07-29
 
 ### Tuzatildi
