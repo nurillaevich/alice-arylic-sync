@@ -51,6 +51,26 @@ o'tkazib yuboradi).
 
 ---
 
+## Qo'shiq faqat Alice'dan chiqadi, kolonkalar jim ("The provider is currently unavailable")
+
+Belgilari: kolonka (Arylic, Sonos va h.k.) ovozi 0.05 da qoladi, Alice
+pasaymaydi, **Sozlamalar → Repairs**da «Music Assistant qo'shiqni chala olmadi»
+chiqadi, Music Assistant logida esa
+`music/verify_item_uri: yandex_music is not available`.
+
+Sabab: Music Assistant'da **Yandex Music provayderi qo'shilmagan** (yoki
+ishlamayapti). Integratsiya Alice chalayotgan trekni `yandex_music://track/<id>`
+ko'rinishida MA'ga beradi — provayder bo'lmasa, MA uni ocha olmaydi.
+
+**Yechim:** Music Assistant → Settings → Music sources → «Add a music source» →
+**Yandex Music** → Yandex hisobingizga kiring. Keyin Alice'da qo'shiqni qayta
+qo'ying — handoff ishlaydi va Repairs ogohlantirishi o'zi yo'qoladi.
+
+> Kolonkalar MA'ga qaysi provayder orqali ulangani (Sonos, LinkPlay/Arylic,
+> Cast) bunga ta'sir qilmaydi — MA'da musiqa *manbai* (Yandex Music) bo'lishi shart.
+
+---
+
 ## music_assistant.play_media xato beradi
 
 - Chiqish entity'si haqiqatan **Music Assistant** `media_player` ekanini tekshiring

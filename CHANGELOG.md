@@ -3,6 +3,24 @@
 Barcha muhim o'zgarishlar shu faylda qayd etiladi.
 Format [Keep a Changelog](https://keepachangelog.com/) asosida.
 
+## [1.6.4] - 2026-10-26
+
+### Tuzatildi
+- **Qo'shiq faqat Alice'dan chiqib, kolonkalar jim qolardi — hech qanday
+  ogohlantirishsiz.** Music Assistant trekni chala olmasa (eng ko'p sabab: MA'da
+  Yandex Music provayderi qo'shilmagan — *"The provider is currently
+  unavailable"*), handoff `play_media` qadamida yiqilardi: kolonkalar
+  boshlang'ich ovozda (0.05) qolib ketardi, Alice esa pasaytirilmasdan chalishda
+  davom etardi va xato faqat logda traceback bo'lib qolardi. Endi:
+  - kolonkalar ovozi handoff'dan oldingi holatiga qaytariladi, Alice'ga
+    tegilmaydi (musiqa uzilmaydi);
+  - **Sozlamalar → Repairs**da aniq ogohlantirish chiqadi: qaysi trek, qaysi
+    kolonka, xato matni va nima qilish kerakligi (MA → Settings → Music sources →
+    Yandex Music). Keyingi muvaffaqiyatli handoff'da o'zi yo'qoladi;
+  - «Sinxron» knopkasining `last_run` atributi `handoff_failed` bo'ladi;
+  - trek unutiladi, shuning uchun provayder tuzatilgach keyingi qo'shiqda
+    handoff qayta urinadi.
+
 ## [1.6.3] - 2026-07-29
 
 ### Tuzatildi
