@@ -111,5 +111,11 @@
         "name": "Guruh"
       }
     }
+  },
+  "issues": {
+    "play_media_failed": {
+      "title": "Music Assistant qo'shiqni chala olmadi",
+      "description": "**{title}**: Music Assistant `{media_id}` trekini `{player}` kolonkasida chala olmadi, shuning uchun musiqa faqat Alice'da qoldi (kolonkalar ovozi avvalgi holatiga qaytarildi).\n\nXato: `{error}`\n\nAgar xatoda *The provider is currently unavailable* yozilgan bo'lsa — Music Assistant'da Yandex Music provayderi qo'shilmagan yoki ishlamayapti. Music Assistant → Settings → Music sources → «Add a music source» → **Yandex Music** ni qo'shing va Yandex hisobingizga kiring. Boshqa provayder ishlatsangiz, integratsiya sozlamalaridagi «Trek URI prefiksi»ni tekshiring. Keyingi muvaffaqiyatli uzatishda bu ogohlantirish o'zi yo'qoladi."
+    }
   }
 }

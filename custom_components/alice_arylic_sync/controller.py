@@ -21,6 +21,7 @@ from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Event, HomeAssistant, State, callback
+from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.event import (
     EventStateChangedData,
     async_track_state_change_event,
@@ -31,6 +32,7 @@ from .const import (
     CONF_ALICE_ENTITY,
     CONF_ARYLIC_ENTITIES,
     DEFAULTS,
+    DOMAIN,
     INVALID_CONTENT_IDS,
     OPT_ALICE_END_VOLUME,
     OPT_ALICE_GAP_MS,
@@ -70,6 +72,10 @@ UNAVAILABLE_STATES = (None, "unavailable", "unknown")
 FEATURE_GROUPING = 524288
 
 
+class PlaybackFailedError(Exception):
+    """Music Assistant could not start the handed-off track on the outputs."""
+
+
 def _safe_float(value: Any, default: float) -> float:
     """float() with a default only for None/unconvertible — 0.0 stays 0.0
     (matches the Jinja `| float(default)` filter the blueprints use)."""
@@ -107,6 +113,9 @@ class SyncController:
         # stop has not touched any volume yet, so it must NOT block a "louder"
         # redirect spoken during that window.
         self._stop_pending: bool = False
+        # Repairs issue raised when Music Assistant cannot play the track (e.g.
+        # the Yandex Music provider is not set up), cleared on the next success.
+        self._play_issue_id = f"play_media_failed_{entry.entry_id}"
 
     # ---------- lifecycle ----------
 
@@ -129,6 +138,7 @@ class SyncController:
             self._unsub()
             self._unsub = None
         self._cancel_running()
+        ir.async_delete_issue(self.hass, DOMAIN, self._play_issue_id)
 
     def _cancel_running(self) -> None:
         if self._task is not None and not self._task.done():
@@ -162,6 +172,10 @@ class SyncController:
         except asyncio.CancelledError:
             _LOGGER.debug("%s cancelled (new trigger arrived)", name)
             raise
+        except PlaybackFailedError as err:
+            # Already cleaned up and explained — no traceback needed.
+            self.last_run = f"{name}_failed"
+            _LOGGER.error("%s", err)
         except Exception:
             _LOGGER.exception("Error during %s", name)
 
@@ -590,17 +604,54 @@ class SyncController:
             entity_id: self._attr(entity_id, "media_content_id")
             for entity_id in self.arylic_entities
         }
+        pre_play_volumes = {
+            entity_id: _safe_float(self._attr(entity_id, "volume_level"), floor)
+            for entity_id in self.arylic_entities
+        }
+        media_id = f"{self._opt(OPT_TRACK_URI_PREFIX)}{content_id}"
         await self._set_outputs_volume(floor)
-        await self.hass.services.async_call(
-            "music_assistant",
-            "play_media",
-            {
-                "media_id": f"{self._opt(OPT_TRACK_URI_PREFIX)}{content_id}",
-                "media_type": str(self._opt(OPT_MEDIA_TYPE)),
-            },
-            target={"entity_id": self.leader},
-            blocking=True,
-        )
+        try:
+            await self.hass.services.async_call(
+                "music_assistant",
+                "play_media",
+                {
+                    "media_id": media_id,
+                    "media_type": str(self._opt(OPT_MEDIA_TYPE)),
+                },
+                target={"entity_id": self.leader},
+                blocking=True,
+            )
+        except Exception as err:  # noqa: BLE001 - any failure here means nothing plays
+            # Nothing started on the outputs. Before this guard the run died
+            # here with the outputs parked at floor and Alice never faded, so
+            # the music silently stayed on Alice only (the usual cause: the
+            # Yandex Music provider is missing/unavailable in Music Assistant —
+            # "The provider is currently unavailable"). Put the outputs back,
+            # leave Alice playing untouched, forget the track so the next start
+            # retries, and surface the cause in Repairs.
+            await self._restore_outputs(pre_play_volumes)
+            self._handoff_content_id = None
+            ir.async_create_issue(
+                self.hass,
+                DOMAIN,
+                self._play_issue_id,
+                is_fixable=False,
+                severity=ir.IssueSeverity.ERROR,
+                translation_key="play_media_failed",
+                translation_placeholders={
+                    "title": self.entry.title,
+                    "media_id": media_id,
+                    "player": self.leader,
+                    "error": str(err),
+                },
+            )
+            raise PlaybackFailedError(
+                f"Music Assistant could not play {media_id} on {self.leader}: "
+                f"{str(err).rstrip('.')}. The music stays on Alice. If the provider is "
+                "unavailable, add and sign in to the matching music provider "
+                "(Yandex Music) in Music Assistant -> Settings -> Music sources"
+            ) from err
+        ir.async_delete_issue(self.hass, DOMAIN, self._play_issue_id)
 
         # 2) Wait until EVERY output has actually SWITCHED to the new track — not
         #    just reports 'playing'. A member still 'playing' the PREVIOUS track
